@@ -1,23 +1,18 @@
-FROM node:18 as builder
-WORKDIR /app
-COPY . .
-RUN npm install && npm run build
-FROM ubuntu:20.04
-ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && \
-    apt-get install -y openssh-server curl && \
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs && \
-    npm install -g serve && \
-    mkdir /var/run/sshd
-WORKDIR /app
-COPY --from=builder /app/build /app/build
-RUN useradd -m -s /bin/bash sshuser && \
-    mkdir -p /home/sshuser/.ssh && \
-    chown sshuser:sshuser /home/sshuser/.ssh && \
-    chmod 700 /home/sshuser/.ssh && \
-    echo 'sshuser:sshpassword' | chpasswd
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-EXPOSE 22 3000
-CMD ["/entrypoint.sh"]
+FROM nginx:stable-alpine
+
+
+RUN apk update && apk add --no-cache openssh bash shadow
+
+RUN echo "root:aryaman" | chpasswd
+
+
+RUN sed -i 's/^#\?PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+    sed -i 's/^#\?PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+
+
+RUN ssh-keygen -A
+RUN mkdir -p /var/run/sshd
+
+EXPOSE 22 80
+
+CMD ["/bin/bash", "-c", "/usr/sbin/sshd && nginx -g 'daemon off;'"]
