@@ -9,7 +9,7 @@ pipeline {
                     extensions: [],
                     userRemoteConfigs: [[
                         credentialsId: 'gitpass',
-                        url: 'git@github.com:Aryaman200314/Private-EKS-code.git'
+                        url: 'https://github.com/Aryaman200314/Fargate-auto-update.git'
                     ]]
                 )
             }
