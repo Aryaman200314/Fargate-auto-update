@@ -1,5 +1,5 @@
 pipeline {
-    agent {label 'Jobs'}
+    agent any
 
     stages {
         stage('Checkout Code') {
